@@ -1,0 +1,19 @@
+version: '3'
+services:
+  db:
+    image: my-postgres-image
+    environment:
+      - POSTGRES_USER=todo_user
+      - POSTGRES_PASSWORD=my_password
+      - POSTGRES_DB=todo_list
+    ports:
+      - 5432:5432
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.django.txt
+    ports:
+      - 8000:8000
+    depends_on:
+      - db

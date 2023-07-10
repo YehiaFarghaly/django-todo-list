@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .container {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  h1 {
+    text-align: center;
+  }
+  
+  form {
+    display: flex;
+    margin-bottom: 10px;
+  }
+  
+  input[type="text"] {
+    flex: 1;
+    padding: 5px;
+    font-size: 16px;
+  }
+  
+  button {
+    padding: 5px 10px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  li input[type="checkbox"] {
+    margin-right: 10px;
+  }
+  
+  li span {
+    flex: 1;
+    font-size: 16px;
+  }
+  
+  li button {
+    padding: 2px 5px;
+    background-color: #f44336;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  li button:hover {
+    background-color: #e53935;
+  }
+  
+        </style>
+</head>
+<body>
+    <div class="container">
+      <h1>Todo List</h1>
+      <form method="post" action="{% url 'create_task' %}" id="todo-form">
+        <input type="text" id="todo-input" placeholder="Enter a task" name="task_text">
+        <button type="submit">Add</button>
+      </form>
+      <ul id="todo-list">
+        {% for task in tasks %}
+        <li>{{ task.text }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+    const todoForm = document.getElementById("todo-form");
+    const todoInput = document.getElementById("todo-input");
+    const todoList = document.getElementById("todo-list");
+
+    todoForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        const taskName = todoInput.value;
+        if (taskName.trim() !== "") {
+            addTask(taskName);
+            saveTask(taskName);
+            todoInput.value = "";
+        }
+    });
+
+    todoList.addEventListener("click", function(event) {
+        if (event.target.classList.contains("delete-button")) {
+            const taskItem = event.target.closest("li");
+            removeTask(taskItem);
+        }
+    });
+
+    function addTask(taskName) {
+        const taskItem = document.createElement("li");
+        taskItem.innerHTML = `
+            <input type="checkbox">
+            <span>${taskName}</span>
+            <button class="delete-button">Delete</button>
+        `;
+        todoList.appendChild(taskItem);
+    }
+
+    function removeTask(taskItem) {
+        todoList.removeChild(taskItem);
+    }
+
+    function saveTask(taskName) {
+        fetch("{% url 'create_task' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                task_text: taskName
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error saving task");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Task saved successfully", data);
+            })
+            .catch(error => {
+                console.error("Error saving task", error);
+            });
+    }
+});
+
+    </script>
+  </body>
+</html>
