@@ -66,24 +66,13 @@
     font-size: 16px;
   }
   
-  li button {
-    padding: 2px 5px;
-    background-color: #f44336;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-  }
-  
-  li button:hover {
-    background-color: #e53935;
-  }
-  
         </style>
 </head>
 <body>
     <div class="container">
       <h1>Todo List</h1>
       <form method="post" action="{% url 'create_task' %}" id="todo-form">
+        {% csrf_token %}
         <input type="text" id="todo-input" placeholder="Enter a task" name="task_text">
         <button type="submit">Add</button>
       </form>
@@ -104,39 +93,43 @@
         event.preventDefault();
         const taskName = todoInput.value;
         if (taskName.trim() !== "") {
+          console.log("TaskName = ",taskName)
             addTask(taskName);
             saveTask(taskName);
             todoInput.value = "";
         }
     });
 
-    todoList.addEventListener("click", function(event) {
-        if (event.target.classList.contains("delete-button")) {
-            const taskItem = event.target.closest("li");
-            removeTask(taskItem);
-        }
-    });
 
     function addTask(taskName) {
         const taskItem = document.createElement("li");
         taskItem.innerHTML = `
             <input type="checkbox">
             <span>${taskName}</span>
-            <button class="delete-button">Delete</button>
         `;
         todoList.appendChild(taskItem);
     }
 
-    function removeTask(taskItem) {
-        todoList.removeChild(taskItem);
-    }
+    const createTaskUrl = "{% url 'create_task' %}";
+
+    function getCookie(name) {
+  const cookieValue = document.cookie.match(
+    "(^|;)\\s*" + name + "\\s*=\\s*([^;]+)"
+  );
+  return cookieValue ? cookieValue.pop() : "";
+}
+
+
 
     function saveTask(taskName) {
-        fetch("{% url 'create_task' %}", {
+      console.log('inside saveTask taskName = ',taskName);
+      const formData = new FormData();
+      formData.append("task_text", taskName);
+        fetch(createTaskUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
+              "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
             },
             body: JSON.stringify({
                 task_text: taskName

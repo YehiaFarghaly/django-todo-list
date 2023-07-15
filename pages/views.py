@@ -14,7 +14,7 @@ def create_task(request):
         text = request.POST.get('task_text')
         task = TodoTask(text=text)
         task.save()
-        return redirect('task_list')
+        return redirect('index')
     tasks = TodoTask.objects.all()
     return render(request, 'pages/index.html', {'tasks': tasks})
 
