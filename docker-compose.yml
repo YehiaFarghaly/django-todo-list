@@ -3,22 +3,22 @@ services:
   db:
     image: postgres:latest
     environment:
-      - POSTGRES_USER=todo_user
-      - POSTGRES_PASSWORD=my_password
-      - POSTGRES_DB=todo_list
-      - POSTGRES_HOST=db
+      - POSTGRES_USER=${DB_USER_NAME}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_HOST=${DB_HOST}
     ports:
-      - 5432:5432
+      - ${DB_PORT}:${DB_PORT}
+    env_file:
+      - .env
 
   web:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 8000:8000
-    environment:
-      - POSTGRES_USER=todo_user
-      - POSTGRES_PASSWORD=my_password
-      - POSTGRES_DB=todo_list
+      - ${DJANGO_PORT}:${DJANGO_PORT}
+    env-file:
+      - .env
     depends_on:
       - db
